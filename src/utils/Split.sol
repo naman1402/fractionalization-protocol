@@ -53,7 +53,7 @@ contract Split is Context {
         for (uint256 i = 0; i < payees.length; i++) {
             _addPayee(payees[i], shares_[i]);
         }
-    } 
+    }
 
     function _release(address payable account) internal {
         require(_shares[account] > 0, "PaymentSplitter: account has no shares");
@@ -73,11 +73,11 @@ contract Split is Context {
         emit PaymentReleased(account, payment);
     }
 
-    function _pendingPayment(
-        address account,
-        uint256 totalReceived,
-        uint256 alreadyReleased
-    ) private view returns (uint256) {
+    function _pendingPayment(address account, uint256 totalReceived, uint256 alreadyReleased)
+        private
+        view
+        returns (uint256)
+    {
         return (totalReceived * _shares[account]) / _totalShares - alreadyReleased;
     }
 

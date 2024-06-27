@@ -169,8 +169,9 @@ contract FractionalNFT is ERC20, IERC1155, ERC165 {
         bytes memory data
     ) private {
         if (isContract(to)) {
-            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (bytes4 response)
-            {
+            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (
+                bytes4 response
+            ) {
                 if (response != IERC1155Receiver(to).onERC1155BatchReceived.selector) {
                     revert("ERC1155Receiver rejected tokens");
                 }
@@ -186,5 +187,4 @@ contract FractionalNFT is ERC20, IERC1155, ERC165 {
         return interfaceId == type(IERC1155).interfaceId || interfaceId == type(IERC1155MetadataURI).interfaceId
             || super.supportsInterface(interfaceId);
     }
-
 }

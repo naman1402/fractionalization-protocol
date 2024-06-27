@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract Vault is FractionalNFT, Split, ReentrancyGuard {
     address public collection; // ERC721 token address of Frac. NFT
     uint256 public tokenId; // ERC721 token id
-    uint256 public listPrice; // price of fraction of the fractionalised NFT for primary sale 
+    uint256 public listPrice; // price of fraction of the fractionalised NFT for primary sale
     address public curator; // address of who initially deposited
     uint256 public fee; // platform fee paid to the curator
     uint256 public start; // start date
@@ -17,20 +17,27 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
     uint256 private constant MAX = 10_000;
     bool public vaultClosed;
 
-    enum State { inactive, fractionalized, live, redeemed, boughtOut }
+    enum State {
+        inactive,
+        fractionalized,
+        live,
+        redeemed,
+        boughtOut
+    }
+
     State public state;
 
-
-    constructor(address _curator, uint256 _fee, string memory _name, string memory _symbol, string memory _uri) FractionalNFT(_name, _symbol, _uri) {
-        require(_curator!=address(0));
+    constructor(address _curator, uint256 _fee, string memory _name, string memory _symbol, string memory _uri)
+        FractionalNFT(_name, _symbol, _uri)
+    {
+        require(_curator != address(0));
         curator = _curator;
         fee = _fee;
         state = State.inactive;
     }
 
-
     // create a fractionalized NFT. _collection and _tokenId is the address and id of NFT that is being fractionalized
-    // _supply is the count of fractions (ERC20) of the NFT. 
+    // _supply is the count of fractions (ERC20) of the NFT.
     function fractionalize(address _to, address _collection, uint256 _tokenId, uint256 _supply) public {
         require(state == State.inactive);
         collection = _collection;
@@ -55,10 +62,10 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
     function purchase(uint256 _amount) external payable nonReentrant {
         require(state == State.live);
         require(block.timestamp >= start);
-        if(end > 0) require(block.timestamp < end);
+        if (end > 0) require(block.timestamp < end);
 
         // if fee exists, then calculating it. Else, no feeAmount
-        if(fee > 0) {
+        if (fee > 0) {
             uint256 feeAmount = ((_amount * listPrice) * fee) / MAX;
             require(((_amount * listPrice) + feeAmount) == msg.value);
         } else {
@@ -89,7 +96,6 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
         require(msg.value >= price);
         state = State.boughtOut;
         IERC721(collection).safeTransferFrom(address(this), _msgSender(), tokenId, "");
-
     }
 
     // burning all tokens owner by _msgSender() and then transferring ether to user
@@ -97,12 +103,12 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
         require(state == State.boughtOut);
         uint256 claimerBalance = balanceOf(_msgSender());
         require(claimerBalance > 0);
-        
+
         uint256 fractionsAmount = totalSupply();
         uint256 buyoutPrice = reservePrice();
         uint256 claimAmount = (buyoutPrice * claimerBalance) / fractionsAmount;
         _burn(_msgSender(), claimerBalance);
-        (bool success, ) = payable(_msgSender()).call{value: claimAmount}("");
+        (bool success,) = payable(_msgSender()).call{value: claimAmount}("");
         require(success);
     }
 
@@ -124,7 +130,7 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
     function setPaymentSplitter(address[] calldata __payees, uint256[] calldata _shares) external {
         require(_msgSender() == curator);
         _setPaymentSplitter(__payees, _shares);
-    }   
+    }
 
     function withdraw() external {
         require(address(this).balance > 0);
