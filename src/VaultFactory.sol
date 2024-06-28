@@ -7,8 +7,8 @@ import {CREATE3} from "../lib/solmate/src/utils/CREATE3.sol";
 import "./Vault.sol";
 
 contract VaultFactory is Pausable, Ownable(msg.sender) {
-    uint256 public count;
-    mapping(uint256 => address) public vaults;
+    uint256 public count; // number of vaults
+    mapping(uint256 => address) public vaults; // vault id to vault address
 
     constructor() {}
 
@@ -24,8 +24,10 @@ contract VaultFactory is Pausable, Ownable(msg.sender) {
         uint256 _end,
         uint256 _price
     ) public whenNotPaused returns (address) {
+        // hash of various parameters
         bytes32 salt =
             keccak256(abi.encodePacked(_collection, _tokenId, _supply, msg.sender, _fee, _name, _symbol, _uri));
+            // Using CREATE3 makes it harder for attackers to predict the deployment address and exploit the vault before its creation
         Vault vault = Vault(
             CREATE3.deploy(
                 salt, abi.encodePacked(type(Vault).creationCode, abi.encode(msg.sender, _fee, _name, _symbol, _uri)), 0
@@ -33,7 +35,9 @@ contract VaultFactory is Pausable, Ownable(msg.sender) {
         );
 
         assert(address(vault) == CREATE3.getDeployed(salt));
+        // transferring NFT from deployer to vault
         IERC721(_collection).transferFrom(msg.sender, address(vault), _tokenId);
+        // using vault to fractionalize the nft and create fractions(tokens) and starting the sale
         Vault(vault).fractionalize(msg.sender, _collection, _tokenId, _supply);
         Vault(vault).configureSale(_start, _end, _price);
         address vaultAddress = address(vault);
@@ -43,6 +47,7 @@ contract VaultFactory is Pausable, Ownable(msg.sender) {
         return vaultAddress;
     }
 
+    //ONLY the factory owner (msg.sender) can call this function
     function pause() external onlyOwner{
         _pause();
     }

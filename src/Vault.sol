@@ -117,6 +117,7 @@ contract Vault is FractionalNFT, Split, ReentrancyGuard {
         return listPrice * totalSupply();
     }
 
+    // curator is the address who initially deposited (set in constructor)
     function updateCurator(address _newCurator) external {
         require(_msgSender() == curator);
         curator = _newCurator;

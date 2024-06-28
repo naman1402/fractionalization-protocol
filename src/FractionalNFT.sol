@@ -19,7 +19,7 @@ contract FractionalNFT is ERC20, IERC1155, ERC165 {
     string private uri;
 
     constructor(string memory _name, string memory _symbol, string memory _uri) ERC20(_name, _symbol) {
-        uri = _uri;
+        _setUri(_uri);
     }
 
     function getUri(uint256) public view returns (string memory) {
@@ -131,7 +131,7 @@ contract FractionalNFT is ERC20, IERC1155, ERC165 {
         uri = newUri;
     }
 
-    function isContract(address _addr) private returns (bool) {
+    function isContract(address _addr) private view returns (bool) {
         uint32 size;
         assembly {
             size := extcodesize(_addr)
