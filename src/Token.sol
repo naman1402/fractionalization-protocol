@@ -18,7 +18,14 @@ contract Token is ERC20, ERC20Burnable {
 
     error Token__NotDeployer();
 
-    constructor(address _address, uint256 _id, address _owner, uint256 _supply, string memory _name, string memory _symbol) ERC20(_name, _symbol) {
+    constructor(
+        address _address,
+        uint256 _id,
+        address _owner,
+        uint256 _supply,
+        string memory _name,
+        string memory _symbol
+    ) ERC20(_name, _symbol) {
         nft_address = _address;
         nft_id = _id;
         nft_owner = _owner;
@@ -26,7 +33,7 @@ contract Token is ERC20, ERC20Burnable {
         _mint(_owner, _supply);
     }
 
-    function transfer(address to, uint256 amount) override public returns(bool) {
+    function transfer(address to, uint256 amount) public override returns (bool) {
         _transfer(_msgSender(), to, amount);
         return true;
     }
@@ -39,10 +46,10 @@ contract Token is ERC20, ERC20Burnable {
 
     function burn(uint256 amount) public virtual override {
         _burn(_msgSender(), amount);
-    } 
+    }
 
     function updateOwner(address _owner) public {
-        if (msg.sender!=deployer){
+        if (msg.sender != deployer) {
             revert Token__NotDeployer();
         }
         nft_owner = _owner;
